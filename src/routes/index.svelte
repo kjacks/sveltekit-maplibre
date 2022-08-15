@@ -1,11 +1,18 @@
 <script>
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	// import maplibregl from 'maplibre-gl';
 	import { Map, NavigationControl } from 'maplibre-gl';
+	import 'maplibre-gl/dist/maplibre-gl.css';
 	let map;
 	let mapContainer;
+	let isLoaded = false;
 
 	let zoomLvl = 1;
+
+	$: isLoaded &&
+		map.zoomTo(zoomLvl, {
+			duration: 600
+		});
 
 	onMount(() => {
 		map = new Map({
@@ -14,21 +21,26 @@
 			center: [-74.5, 40], // starting position [lng, lat]
 			zoom: zoomLvl // starting zoom
 		});
-	});
 
-	// onDestroy(() => {
-	// 	map.remove();
-	// });
+		map.addControl(
+			new NavigationControl({
+				showZoom: true,
+				showCompass: false
+			}),
+			'top-right'
+		);
+		isLoaded = true;
+	});
 </script>
 
 <h1>MapLibre</h1>
 Zoom:<input type="number" bind:value={zoomLvl} />
-<div id="map" bind:this={mapContainer} style="width: 100vw; height: 80vh; position: relative;" />
+<div id="map" bind:this={mapContainer} />
 
 <style>
-	:global(.maplibregl-ctrl-bottom-right, details.mapboxgl-ctrl-attrib) {
-		position: absolute;
-		left: 0;
-		bottom: 0;
+	#map {
+		width: 100vw;
+		height: 80vh;
+		position: relative;
 	}
 </style>
