@@ -1,7 +1,9 @@
 <script>
 	import { onMount } from 'svelte';
 	// import maplibregl from 'maplibre-gl';
-	import { Map, NavigationControl } from 'maplibre-gl';
+	// import { Map, NavigationControl } from 'maplibre-gl';
+	import pkg from 'maplibre-gl';
+	const { Map, NavigationControl } = pkg;
 	import 'maplibre-gl/dist/maplibre-gl.css';
 	let map;
 	let mapContainer;

@@ -1,7 +1,10 @@
 <script>
 	import { browser } from '$app/env';
 	import { onMount } from 'svelte';
-	import maplibregl from 'maplibre-gl';
+	// import maplibregl from 'maplibre-gl';
+	import pkg from 'maplibre-gl';
+	const { Map, NavigationControl } = pkg;
+	const maplibregl = pkg;
 	import Compare from '@maplibre/maplibre-gl-compare';
 	import '../../../node_modules/maplibre-gl/dist/maplibre-gl.css';
 	import '../../../node_modules/@maplibre/maplibre-gl-compare/dist/maplibre-gl-compare.css';
