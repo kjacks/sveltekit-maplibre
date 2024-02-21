@@ -8,13 +8,17 @@
 	const { Map, NavigationControl } = pkg;
 	import 'maplibre-gl/dist/maplibre-gl.css';
 
+	const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY
+	const SOURCE_ID = 'openmaptiles'
+	const LAYER_ID = '3d-buildings'
 
 	let map;
 	let mapContainer;
 	let isLoaded = false;
 	let tallBuildingsVisible = true;
+	let hoveredFeature;
+	let heightFilterValue = 1
 
-	const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY
 
 	onMount(() => {
 		map = new Map({
@@ -49,24 +53,25 @@
 				}
 			}
 
-			map.addSource('openmaptiles', {
+			map.addSource(SOURCE_ID, {
 				url: `https://api.maptiler.com/tiles/v3/tiles.json?key=${MAPTILER_KEY}`,
 				type: 'vector',
 			});
 
 			map.addLayer(
 				{
-					'id': '3d-buildings',
-					'source': 'openmaptiles',
+					'id': LAYER_ID,
+					'source': SOURCE_ID,
 					'source-layer': 'building',
 					'type': 'fill-extrusion',
 					'minzoom': 15,
 					'paint': {
-									'fill-extrusion-color': [
-													'interpolate',
-													['linear'],
-													['get', 'render_height'], 0, 'lightgray', 200, 'royalblue', 400, 'lightblue'
-									],
+						'fill-extrusion-color': [
+		          'case',
+		          ['boolean', ['feature-state', 'hover'], false],
+		          '#ff0000',
+		          '#ddd'
+		        ],
 									'fill-extrusion-height': [
 													'interpolate',
 													['linear'],
@@ -79,13 +84,91 @@
 									'fill-extrusion-base': ['case',
 													['>=', ['get', 'zoom'], 16],
 													['get', 'render_min_height'], 0
-									]
+									],
 					}
 				},
 				labelLayerId
 			);
-  });
+
+			map.on('mousemove', function(e) {
+					//157001066
+					var features = map.queryRenderedFeatures(e.point, {
+							layers: ['3d-buildings']
+					});
+					if (features[0]) {
+							mouseover(features[0]);
+					} else {
+							mouseout();
+					}
+
+			});
+
+			map.on('mouseout', function(e) {
+					mouseout();
+			});
+
+			function mouseout() {
+					if (!hoveredFeature) return;
+					map.getCanvasContainer().style.cursor = 'default';
+					map.setFeatureState({
+							source: hoveredFeature.source,
+							sourceLayer: hoveredFeature.sourceLayer,
+							id: hoveredFeature.id
+					}, {
+							hover: false
+					});
+
+			}
+
+			function mouseover(feature) {
+					hoveredFeature = feature;
+					map.getCanvasContainer().style.cursor = 'pointer';
+
+					map.setFeatureState({
+							source: hoveredFeature.source,
+							sourceLayer: hoveredFeature.sourceLayer,
+							id: hoveredFeature.id
+					}, {
+							hover: true
+					});
+			}
+
+
+
+				// map.on('mousemove', LAYER_ID, (e) => {
+				// 				if (e.features.length > 0) {
+				// 								if (hoveredFeatureId) {
+				// 												map.setFeatureState(
+				// 																{source: SOURCE_ID, sourceLayer: 'buildings', id: hoveredFeatureId},
+				// 																{hover: false}
+				// 												);
+				// 								}
+				// 								hoveredFeatureId = e.features[0].id;
+				// 								map.setFeatureState(
+				// 												{source: SOURCE_ID, sourceLayer: 'buildings', id: hoveredFeatureId},
+				// 												{hover: true}
+				// 								);
+				// 				}
+				// });
+
+				// map.on('mouseleave', LAYER_ID, () => {
+				// 				if (hoveredFeatureId) {
+				// 								map.setFeatureState(
+				// 												{source: SOURCE_ID, sourceLayer: 'buildings', id: hoveredFeatureId},
+				// 												{hover: false}
+				// 								);
+				// 				}
+				// 				hoveredFeatureId = null;
+				});
 	});
+
+	const filterMapHeights = () => {
+		map?.setFilter(LAYER_ID, ['<=', 'render_height', heightFilterValue])
+	}
+
+	$: heightFilterValue, filterMapHeights()
+
+	$: console.log(heightFilterValue, hoveredFeature)
 
 	const toggleTallBuildingVisibity = () => {
 		console.log('toggling')
@@ -100,7 +183,10 @@
 	}
 </script>
 
+<input id="slider" type="range" min="0" max="300" step="10" bind:value={heightFilterValue} />
+
 <button on:click={toggleTallBuildingVisibity}>{tallBuildingsVisible ? "Hide tall buildings" : "Show tall buildings"}</button>
+
 
 <div id="map" bind:this={mapContainer} />
 
