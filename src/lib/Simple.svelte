@@ -12,8 +12,7 @@
 	let map;
 	let mapContainer;
 	let isLoaded = false;
-
-	let zoomLvl = 1;
+	let tallBuildingsVisible = true;
 
 	const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY
 
@@ -87,7 +86,21 @@
 			);
   });
 	});
+
+	const toggleTallBuildingVisibity = () => {
+		console.log('toggling')
+
+		if (tallBuildingsVisible) {
+			map.setFilter('3d-buildings', ['<=', 'render_height', 100]);
+		} else {
+			map.setFilter('3d-buildings', null)
+		}
+
+		tallBuildingsVisible = !tallBuildingsVisible
+	}
 </script>
+
+<button on:click={toggleTallBuildingVisibity}>{tallBuildingsVisible ? "Hide tall buildings" : "Show tall buildings"}</button>
 
 <div id="map" bind:this={mapContainer} />
 
