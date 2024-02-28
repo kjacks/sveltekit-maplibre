@@ -1,9 +1,9 @@
 <script>
-	import MapWrapper from '$lib/Simple.svelte';
+	import MapWrapper from '$lib/MapWrapper.svelte';
 	import { browser } from '$app/env';
 </script>
 
-<code>{browser} </code>
+<code>{browser}</code>
 <MapWrapper />
 
 <style>
