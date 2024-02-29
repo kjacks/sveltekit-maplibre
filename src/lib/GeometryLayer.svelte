@@ -1,14 +1,5 @@
 <script>
-	// import { env } from '$env/dynamic/private';
-
 	import { onMount, getContext } from 'svelte';
-	import { tweened } from 'svelte/motion';
-	import { cubicOut } from 'svelte/easing';
-	// import maplibregl from 'maplibre-gl';
-	// import { Map, NavigationControl } from 'maplibre-gl';
-	import pkg from 'maplibre-gl';
-	const { Map, NavigationControl } = pkg;
-	import 'maplibre-gl/dist/maplibre-gl.css';
 
 	const SOURCE_ID = 'openmaptiles'
 	const LAYER_ID = '3d-buildings'
@@ -24,7 +15,14 @@
 	const refLayer = getContext('refLayer')
 	const MAPTILER_KEY = getContext('MAPTILER_KEY')
 
-	$: if ($map && !$map.getSource(SOURCE_ID)) {
+	$: console.log($map)
+
+	onMount(() => {
+		console.log('in buildings layer')
+
+	})
+
+	$: if ($map) {
 		$map.addSource(SOURCE_ID, {
 			url: `https://api.maptiler.com/tiles/v3/tiles.json?key=${MAPTILER_KEY}`,
 			type: 'vector',
@@ -36,7 +34,7 @@
 				'source': SOURCE_ID,
 				'source-layer': 'building',
 				'type': 'fill-extrusion',
-				// 'minzoom': 11,
+				// 'minzoom': 15,
 				'paint': {
 					// 'fill-extrusion-color': ['get', 'colour'],
 					// 'fill-extrusion-color': [
@@ -58,7 +56,7 @@
 						'fill-extrusion-height': ['get', 'render_height'],
 						// 'fill-extrusion-base': ['get', 'render_min_height'],
 						'fill-extrusion-base': ['case',
-										['>=', ['get', 'zoom'], 11],
+										['>=', ['get', 'zoom'], 16],
 										['get', 'render_min_height'], 0  
 						],
 				}

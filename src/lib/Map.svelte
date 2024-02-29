@@ -7,6 +7,8 @@
 
 	const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY
 
+	export let config = {}
+
 	const map = writable()
 	const refLayer = writable()
 
@@ -26,7 +28,8 @@
 			center: [-74.0066, 40.7135], // starting position [lng, lat]
 			zoom: 15.5, // starting zoom
 			pitch: 45,
-			bearing: -17.6
+			bearing: -17.6,
+			...config
 		});
 
 		mapLibreMap.addControl(
